@@ -12,7 +12,7 @@ import glob
 import io
 import time
 import os
-
+# primer cambio de mario
 cap= cv2.VideoCapture(0)
 
 OUTPUT_PATH = Path(__file__).parent
