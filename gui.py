@@ -162,6 +162,7 @@ def main():
         file="/home/mario/arinapin/git/factory-inference-frontend/assets/image_1.png"))
     
 
+
     # tag all of the drawn widgets
     mycanvas.addtag_all("all")
     while True:
