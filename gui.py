@@ -17,6 +17,8 @@ import os
 #NOTA: al importar tkinter * se reemplaza la Image de PIL con la de Tkinter, 
 # por eso no funcionaba si no le pone el as
 
+#prieba 
+
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path("./assets")
 
