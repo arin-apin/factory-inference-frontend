@@ -2,6 +2,7 @@
 
 
 import fnmatch
+from itertools import count
 import os
 
 flag1 = 0
@@ -26,16 +27,21 @@ else:
         exit()
 
 
-#Comprobar que las imagenes tienen el formato adecuado 
-for root, dirs, files in os.walk("./NO OK"):
-    print(os.listdir('./NO OK'))
-    # if fnmatch.fnmatch(file, '*.txt'):
-    #     print(file)
+file = os.listdir('.')
+print(file)
+print(type(file))
+print(len(file))
+# is
+# #Comprobar que las imagenes tienen el formato adecuado 
+# for root, dirs, files in os.walk("./NO OK"):
+#     print(os.listdir('./NO OK'))
+#     # if fnmatch.fnmatch(file, '*.txt'):
+#     #     print(file)
 
-for root, dirs, files in os.walk("./OK"):
-    print(files)
-    for file in files: 
-        if file.endswith(".jpg"):
-            print("correcto")
-        else:
-            print("error")
+# for root, dirs, files in os.walk("./OK"):
+#     print(files)
+#     for file in files: 
+#         if file.endswith(".jpg"):
+#             print("correcto")
+#         else:
+#             print("error")
