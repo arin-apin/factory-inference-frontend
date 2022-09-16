@@ -11,9 +11,9 @@ from pathlib import Path
 #from google.oauth2 import service_account
 import fnmatch
 import os
-import imghdr
+import shutil
 import glob
-
+import imghdr
 
 JOB = os.getenv('JOB')
 PROJECT_PATH = os.getenv('PROJECT_PATH')
@@ -186,6 +186,8 @@ storage_client = storage.Client()
 #bucket = storage_client.get_bucket("mvp-arin-train-images")
 
 
+
+
 for folder in path_folders_img:
     print(os.path.basename(os.path.normpath(folder)))
     upload_from_directory(GCLOUD_PATH+folder, "mvp-arin.appspot.com", os.path.basename(os.path.normpath(folder)))
@@ -195,3 +197,10 @@ for folder in path_folders_img:
 #  const bucket = admin.storage().bucket()
 #  const path = "path/to/file.wav"
 #  return bucket.file(path).delete()
+
+    for folder in path_folders_img:
+        try:
+            shutil.rmtree("tmp/"+PROJECT_PATH+folder)
+
+        except OSError as e:
+            print("Error: %s - %s." % (e.filename, e.strerror))

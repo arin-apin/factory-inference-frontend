@@ -1,14 +1,26 @@
+from importlib.resources import path
 from google.cloud import storage
 from google.cloud import firestore
 from zipfile import ZipFile
 from zipfile import is_zipfile
 import io
 import os
+from pathlib import Path
+import fnmatch
+import os
+import glob
+import sys
+import shutil
+#Esta es la versión a utilizar en cloudfunction
+
+storage_client = storage.Client()
+#folder where we will save the blob from the firebase
 
 
 
 def hello_firestore(event, context):
-    PROJECT_PATH = '/tmp/'
+    
+    GCLOUD_PATH = '/tmp/'
     db = firestore.Client(project='mvp-arin')
     doc=str(event['value']['name'].rsplit('/',1)[1])
     doc_ref = db.collection(u'projects').document(doc)
@@ -23,32 +35,50 @@ def hello_firestore(event, context):
             zipbytes = io.BytesIO(blob.download_as_string())
             if is_zipfile(zipbytes):
                 print('Es fichero zip')
-              
   
                 print('---------------------> Descargando:', blob.name)
                 blob.download_to_filename('/tmp/'+blob.name)
         
-                with zipfile.ZipFile('/tmp/'+blob.name, 'r') as zip_ref:
+                with ZipFile('/tmp/'+blob.name, 'r') as zip_ref:
                     print('---------------------> Descomprimiendo:', blob.name)
-                    zip_ref.extractall('/tmp/'+PROJECT_PATH)
+                    zip_ref.extractall(GCLOUD_PATH)
 
                 #contar el numero de carpetas
-                res = folder_check(imgs_dir)
+                res = folder_check(GCLOUD_PATH)
 
-                #contar los archivos dentro de cada carpeta, deben ser >20 
+                #Crear la ruta a cada objeto en GCLOUD_PATH, asegurar que son carpetas 
                 dirlist = [item for item in os.listdir(
-                    PROJECT_PATH) if os.path.isdir(os.path.join(PROJECT_PATH, item))]
+                    GCLOUD_PATH) if os.path.isdir(os.path.join(GCLOUD_PATH, item))]
                 
                 #Testear dir_list para ver que pone
 
                 #He quitado el de gcloud_PATH de aqui, para trabajar fuera de la nube
-                path_folders_img = [PROJECT_PATH+'/'+item for item in dirlist]
+                path_folders_img = [GCLOUD_PATH+'/'+item for item in dirlist]
                 print("FULL PATH: ", path_folders_img)
+
+                #Contar el número de imágenes por carpeta debe ser >20
+                for folder in path_folders_img:
+                    valor = contar_imagenes(GCLOUD_PATH+folder)
 
                 #cambiar en el futuro
                 doc_ref.update({u'status': u'imgs_processed_nok'})
 
-       
+
+                #Subida a firebase desde google cloud tmp
+
+                for folder in path_folders_img:
+                    print(os.path.basename(os.path.normpath(folder)))
+                    upload_from_directory(GCLOUD_PATH+folder, "mvp-arin.appspot.com",
+                                    os.path.basename(os.path.normpath(folder)))
+                    print("1 carpeta subida")
+
+                #Una vez subidas, borrar de tmp
+                for folder in path_folders_img:
+                    try:
+                        shutil.rmtree(folder)
+
+                    except OSError as e:
+                        print("Error: %s - %s." % (e.filename, e.strerror))
 
 
             else:
@@ -59,6 +89,18 @@ def hello_firestore(event, context):
             doc_ref.update({u'status': u'imgs_processed_nok'})
     else:
         print('Zip no actualizado')
+
+
+def folder_check(path):
+    ###Cuenta el numero de carpetas, si hay 2 o mas categorias para ML
+
+    print(os.listdir(path))
+    file = os.listdir(path)
+    if len(file) >= 2:
+        print("2 o más ficheros")
+
+    else:
+        print("Faltan categorías, error")
 
 
 def contar_imagenes(path):
