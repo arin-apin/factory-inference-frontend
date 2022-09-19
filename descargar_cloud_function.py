@@ -1,6 +1,6 @@
 from importlib.resources import path
 from google.cloud import storage
-#from google.cloud import firestore
+from google.cloud import firestore
 from zipfile import ZipFile
 from zipfile import is_zipfile
 import io
@@ -11,9 +11,12 @@ import os
 import glob
 import sys
 import shutil
-import event_fb
 import json
-#Esta es la versión a utilizar en cloudfunction
+
+from descargar_zip_cloud_function import PROJECT_PATH
+
+#Esta es la versión a utilizar en cloudfunction directamente, hay que remplazar el fichero por como estaba, 
+# y poner GCLOUD_PATH donde esta path_file
 
 storage_client = storage.Client()
 #folder where we will save the blob from the firebase
@@ -24,16 +27,15 @@ with open("/home/mario/arinapin/Python/comprobacion/prueba2json.json", encoding=
 
 print(data)
 
-
-
-
 def hello_firestore(event, context):
     
     GCLOUD_PATH = '/tmp/'
     db = firestore.Client(project='mvp-arin')
     doc=str(event['value']['name'].rsplit('/',1)[1])
     doc_ref = db.collection(u'projects').document(doc)
+    #print("\n\n --", str(event['value']['fields']))
 
+    #el siguiente if comprueba si existe el campo zip en el fichero json que viene en event
     if 'zip' in event['value']['fields'] and not 'zip' in event['oldValue']['fields']:
         print('Campo zip actualizado')
         doc_ref.update({u'status': u'imgs_processing'})
@@ -42,33 +44,45 @@ def hello_firestore(event, context):
         blob = bucket.blob(event['value']['fields']['path']['stringValue']+'/'+event['value']['fields']['zip']['stringValue'])
         if blob.exists():
             print('Zip encontrado')
+
+            #necesario crear la ruta en local, eliminar el project path en google cloud. 
+            #si se pone el blob.name te va a crear un directorio, entonces no te deja descargar
+            print(os.path.dirname(blob.name))
+            path_file = os.path.dirname(blob.name)
+            #Necesario crear la carpeta. 
+            os.makedirs('/tmp/'+path_file, exist_ok=True)
+
+
             zipbytes = io.BytesIO(blob.download_as_string())
+
             if is_zipfile(zipbytes):
                 print('Es fichero zip')
-  
+                print("blob:", blob.name)
                 print('---------------------> Descargando:', blob.name)
                 blob.download_to_filename('/tmp/'+blob.name)
+
+                RUTA_OFF= GCLOUD_PATH+path_file
         
                 with ZipFile('/tmp/'+blob.name, 'r') as zip_ref:
                     print('---------------------> Descomprimiendo:', blob.name)
-                    zip_ref.extractall(GCLOUD_PATH)
+                    zip_ref.extractall(RUTA_OFF)
 
                 #contar el numero de carpetas
-                res = folder_check(GCLOUD_PATH)
+                res = folder_check(RUTA_OFF)
 
                 #Crear la ruta a cada objeto en GCLOUD_PATH, asegurar que son carpetas 
                 dirlist = [item for item in os.listdir(
-                    GCLOUD_PATH) if os.path.isdir(os.path.join(GCLOUD_PATH, item))]
+                    RUTA_OFF) if os.path.isdir(os.path.join(RUTA_OFF, item))]
                 
                 #Testear dir_list para ver que pone
 
                 #He quitado el de gcloud_PATH de aqui, para trabajar fuera de la nube
-                path_folders_img = [GCLOUD_PATH+'/'+item for item in dirlist]
+                path_folders_img = [RUTA_OFF+'/'+item for item in dirlist]
                 print("FULL PATH: ", path_folders_img)
 
                 #Contar el número de imágenes por carpeta debe ser >20
                 for folder in path_folders_img:
-                    valor = contar_imagenes(GCLOUD_PATH+folder)
+                    valor = contar_imagenes(folder)
 
                 #cambiar en el futuro
                 doc_ref.update({u'status': u'imgs_processed_nok'})
@@ -78,7 +92,7 @@ def hello_firestore(event, context):
 
                 for folder in path_folders_img:
                     print(os.path.basename(os.path.normpath(folder)))
-                    upload_from_directory(GCLOUD_PATH+folder, "mvp-arin.appspot.com",
+                    upload_from_directory(folder, "mvp-arin.appspot.com",
                                     os.path.basename(os.path.normpath(folder)))
                     print("1 carpeta subida")
 

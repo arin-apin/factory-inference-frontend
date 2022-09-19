@@ -126,7 +126,7 @@ def upload_from_directory(directory_path: str, destination_bucket_name: str, des
 print('---------------------> Abriendo:', PROJECT_PATH)
 os.makedirs('/tmp/'+PROJECT_PATH, exist_ok=True)
 for blob in list_blobs(PROJECT_PATH):
-    print("blob:",blob.name)
+    #print("blob:",blob.name)
     if blob.name.endswith("zip"):
         print('---------------------> Descargando:', blob.name)
         blob.download_to_filename('/tmp/'+blob.name)
@@ -184,8 +184,6 @@ for folder in path_folders_img:
 
 storage_client = storage.Client()
 #bucket = storage_client.get_bucket("mvp-arin-train-images")
-
-
 
 
 for folder in path_folders_img:
