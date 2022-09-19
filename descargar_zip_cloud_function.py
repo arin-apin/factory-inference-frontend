@@ -200,7 +200,8 @@ for folder in path_folders_img:
 
     for folder in path_folders_img:
         try:
-            shutil.rmtree("tmp/"+PROJECT_PATH+folder)
+            shutil.rmtree("/tmp/"+folder)
+            print("eliminado")
 
         except OSError as e:
             print("Error: %s - %s." % (e.filename, e.strerror))
