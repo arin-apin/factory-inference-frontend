@@ -1,6 +1,6 @@
 from importlib.resources import path
 from google.cloud import storage
-from google.cloud import firestore
+#from google.cloud import firestore
 from zipfile import ZipFile
 from zipfile import is_zipfile
 import io
@@ -11,10 +11,19 @@ import os
 import glob
 import sys
 import shutil
+import event_fb
+import json
 #Esta es la versión a utilizar en cloudfunction
 
 storage_client = storage.Client()
 #folder where we will save the blob from the firebase
+
+#prueba con el fichero
+with open("/home/mario/arinapin/Python/comprobacion/prueba2json.json", encoding='utf-8') as f:
+    data = json.load(f)
+
+print(data)
+
 
 
 
@@ -24,6 +33,7 @@ def hello_firestore(event, context):
     db = firestore.Client(project='mvp-arin')
     doc=str(event['value']['name'].rsplit('/',1)[1])
     doc_ref = db.collection(u'projects').document(doc)
+
     if 'zip' in event['value']['fields'] and not 'zip' in event['oldValue']['fields']:
         print('Campo zip actualizado')
         doc_ref.update({u'status': u'imgs_processing'})
@@ -139,3 +149,6 @@ def upload_from_directory(directory_path: str, destination_bucket_name: str, des
         if os.path.isfile(local_file) == 1:
             blob = bucket.blob(str(remote_path))
             blob.upload_from_filename(local_file)
+
+
+hello_firestore(data, "-")
