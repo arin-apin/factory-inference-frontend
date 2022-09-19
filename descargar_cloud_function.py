@@ -7,7 +7,6 @@ import io
 import os
 from pathlib import Path
 import fnmatch
-import os
 import glob
 import sys
 import shutil
@@ -21,11 +20,6 @@ from descargar_zip_cloud_function import PROJECT_PATH
 storage_client = storage.Client()
 #folder where we will save the blob from the firebase
 
-#prueba con el fichero
-with open("/home/mario/arinapin/Python/comprobacion/prueba2json.json", encoding='utf-8') as f:
-    data = json.load(f)
-
-print(data)
 
 def hello_firestore(event, context):
     
@@ -47,7 +41,7 @@ def hello_firestore(event, context):
 
             #necesario crear la ruta en local, eliminar el project path en google cloud. 
             #si se pone el blob.name te va a crear un directorio, entonces no te deja descargar
-            print(os.path.dirname(blob.name))
+            print('Dirección del fichero en tmp : '+os.path.dirname(blob.name))
             path_file = os.path.dirname(blob.name)
             #Necesario crear la carpeta. 
             os.makedirs('/tmp/'+path_file, exist_ok=True)
@@ -158,11 +152,9 @@ def upload_from_directory(directory_path: str, destination_bucket_name: str, des
         #remote_path = f'{destination_blob_name}/{"/".join(local_file.split(os.sep)[2:])}'
         p = Path(local_file)
         remote_path = Path(*p.parts[2:])
-        print(remote_path)
-        print(local_file)
+        #print(remote_path)
+        #print(local_file)
         if os.path.isfile(local_file) == 1:
             blob = bucket.blob(str(remote_path))
             blob.upload_from_filename(local_file)
 
-
-hello_firestore(data, "-")
