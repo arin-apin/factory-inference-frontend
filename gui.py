@@ -19,12 +19,12 @@ import os
 
 #prieba 
 
-OUTPUT_PATH = Path(__file__).parent
-ASSETS_PATH = OUTPUT_PATH / Path("./assets")
+# OUTPUT_PATH = Path(__file__).parent
+# ASSETS_PATH = OUTPUT_PATH / Path("./assets")
 
 
-def relative_to_assets(path: str) -> Path:
-    return ASSETS_PATH / Path(path)
+# def relative_to_assets(path: str) -> Path:
+#     return ASSETS_PATH / Path(path)
 
 def load_labels(filename):
   with open(filename, 'r') as f:

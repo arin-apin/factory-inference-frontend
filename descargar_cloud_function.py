@@ -144,7 +144,6 @@ def upload_from_directory(directory_path: str, destination_bucket_name: str, des
    # #dest_bucket_name es el nombre del bucket creado en el storage online
    # y destination_blob_name es la carpeta o directorio que se va a crear en la nube
     rel_paths = glob.glob(directory_path + '/**', recursive=True)
-    print(rel_paths)
     #el nombre de donde saco los ficheros del storage
     bucket = storage_client.get_bucket(destination_bucket_name)
     for local_file in rel_paths:
