@@ -12,7 +12,7 @@ import os
 from pathlib import Path
 from tkinter import *
 from pycoral.adapters import common
-from pycoral.adapters import common
+from pycoral.adapters import clasify
 from pycoral.utils import edgetpu
 from pycoral.utils import dataset 
 
@@ -108,7 +108,7 @@ def main():
     # )
 
     # Forma de redimensionar las imagenes pero pierden calidad sin antialias
-    img_button3 = ImagePIL.open(os.path.join(assets_path,"./assets/button_3.png"))
+    img_button3 = ImagePIL.open(os.path.join(assets_path,"button_3.png"))
     button_3 = img_button3.resize((400, 120), ImagePIL.ANTIALIAS)
     button_image_3 = ImageTk.PhotoImage(button_3)
 
