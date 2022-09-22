@@ -5,7 +5,6 @@ from mimetypes import common_types
 from tkinter import scrolledtext
 import numpy as np
 from numpy import asarray, transpose, tri
-import tensorflow as tf
 from PIL import Image as ImagePIL
 from PIL import ImageTk
 import time
@@ -48,22 +47,22 @@ class ResizingCanvas(Canvas):
         # rescale all the objects tagged with the "all" tag
         self.scale("all", 0, 0, wscale, hscale)
 
-def inferencia(img):
+# def inferencia(img):
 
-    global size
-    inicio=time.time()
-    img= img.convert('RGB').resize(size, ImagePIL.ANTIALIAS)
-    input_data = np.array(asarray(img), dtype=np.float32)
-    input_data = np.expand_dims(input_data , axis=0)
-    interpreter.set_tensor(input_details[0]['index'], input_data)
-    interpreter.invoke()
-    tensor_resultado= interpreter.get_tensor(output_details[0]['index'])[0]
+#     global size
+#     inicio=time.time()
+#     img= img.convert('RGB').resize(size, ImagePIL.ANTIALIAS)
+#     input_data = np.array(asarray(img), dtype=np.float32)
+#     input_data = np.expand_dims(input_data , axis=0)
+#     interpreter.set_tensor(input_details[0]['index'], input_data)
+#     interpreter.invoke()
+#     tensor_resultado= interpreter.get_tensor(output_details[0]['index'])[0]
 
-    top_k = tensor_resultado.argsort()[-5:][::-1]
-    for i in top_k:
-        resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
-    resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
-    return resultado
+#     top_k = tensor_resultado.argsort()[-5:][::-1]
+#     for i in top_k:
+#         resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
+#     resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
+#     return resultado
 
 
 #def relative_to_assets(path: str) -> Path:
@@ -78,6 +77,7 @@ def start_inferencia():
     global flag_inferencia
     print("inferencia started")
     flag_inferencia=1
+
 def main():
     global window, cap, flag_inferencia
     window = Tk()
@@ -86,23 +86,23 @@ def main():
     # mycanvas = ResizingCanvas(
     #     myframe, width=1920, height=1080, bg="#1E1E1E", highlightthickness=0)
     # mycanvas.pack(fill=BOTH, expand=YES)
-    cap = cv2.VideoCapture(0)
-    flag_inferencia = 0
+#     cap = cv2.VideoCapture(0)
+#     flag_inferencia = 0
 
-   #llamada a las labels
-    global labels
-    labels=load_labels("./ImageNetLabels.txt")
+#    #llamada a las labels
+#     global labels
+#     labels=load_labels("./ImageNetLabels.txt")
 
-    #Inferencia
-    global interpreter, input_details, output_details
-    interpreter = tf.lite.Interpreter("./lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite")
-    interpreter.allocate_tensors()
-    input_details = interpreter.get_input_details()
-    output_details = interpreter.get_output_details()
-    _, height, width, _ = interpreter.get_input_details()[0]['shape']
-    # print('tensor input', input_details)
-    global size
-    size = [width, height]
+    # #Inferencia
+    # global interpreter, input_details, output_details
+    # interpreter = tf.lite.Interpreter("./lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite")
+    # interpreter.allocate_tensors()
+    # input_details = interpreter.get_input_details()
+    # output_details = interpreter.get_output_details()
+    # _, height, width, _ = interpreter.get_input_details()[0]['shape']
+    # # print('tensor input', input_details)
+    # global size
+    # size = [width, height]
 
 
     # Definicion de los botones y cuadros de la interfaz
@@ -133,14 +133,15 @@ def main():
     img_button3 = ImagePIL.open((os.path.join(assets_path,"button_1.png")))
     button_3 = img_button3.resize((400, 120), ImagePIL.ANTIALIAS)
     button_image_stop = ImageTk.PhotoImage(button_3)
-
+  
+    # El botón de reseteo
     button_image_reset = PhotoImage(file="./assets/button_2.png")
-    button_reset = Button(image=button_image_reset,
-                          borderwidth=0,
-                          highlightthickness=0,
-                          # command=lambda: os.rename(files[file_pointer],files[file_pointer]+'_'),
-                          relief="flat"
-                          )
+    # button_reset = Button(image=button_image_reset,
+    #                       borderwidth=0,
+    #                       highlightthickness=0,
+    #                       # command=lambda: os.rename(files[file_pointer],files[file_pointer]+'_'),
+    #                       relief="flat"
+    #                       )
 
     img_button2 = ImagePIL.open("./assets/button_2.png")
     button_2 = img_button2.resize((400 , 120), ImagePIL.ANTIALIAS)
@@ -213,20 +214,20 @@ def main():
 
     # bucle de lectura de la webcam
     while True:
-        cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
-        framePIL = ImagePIL.fromarray(cv2image)
-        #Convert image to Photoimage
-        frame1 = ImageTk.PhotoImage(framePIL)
-        vidLabel.configure(image=frame1)
-        vidLabel.image = frame1
+        # cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
+        # framePIL = ImagePIL.fromarray(cv2image)
+        # #Convert image to Photoimage
+        # frame1 = ImageTk.PhotoImage(framePIL)
+        # vidLabel.configure(image=frame1)
+        # vidLabel.image = frame1
 
-        if flag_inferencia ==1:
-            #Hacer la inferencia de la imagen PIL
-            res_inferencia = inferencia(framePIL)
-            x = res_inferencia.split("\n")
-            #print(x[0])
-            labels_array_fondos[0].configure(text=x[0])        
-            labels_array_fondos[1].configure(text=x[1])
+        # if flag_inferencia ==1:
+        #     #Hacer la inferencia de la imagen PIL
+        #     res_inferencia = inferencia(framePIL)
+        #     x = res_inferencia.split("\n")
+        #     #print(x[0])
+        #     labels_array_fondos[0].configure(text=x[0])        
+        #     labels_array_fondos[1].configure(text=x[1])
 
         window.update_idletasks()
         window.update()

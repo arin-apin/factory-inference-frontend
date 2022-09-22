@@ -32,9 +32,13 @@ class ResizingCanvas(Canvas):
         # rescale all the objects tagged with the "all" tag
         self.scale("all", 0, 0, wscale, hscale)
 
+def start_inferencia():
+    global flag_inferencia
+    print("inferencia started")
+    flag_inferencia=1
 
 def main():
-    global window, cap
+    global window, cap, flag_inferencia
     window = Tk()
     # myframe = Frame(window)
     # myframe.pack(fill=BOTH, expand=YES)
