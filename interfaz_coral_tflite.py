@@ -185,7 +185,7 @@ def main():
         frame = Frame(master=window, relief=RAISED,
                       borderwidth=1, )
         frame.grid(row=i-3, column=1, sticky="nsew")
-        label = Label(master=frame,image=image_list[i], width=480, height=320, text="array label", compound='center')
+        label = Label(master=frame,image=image_list[i], width=480, height=320, text="array label", compound='center', font=("Arial",25),fg='#21ab4b'ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub)
         labels_array_fondos.append(label)
         label.pack()
 
