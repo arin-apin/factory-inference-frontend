@@ -4,7 +4,6 @@ from cProfile import label
 from ctypes import resize
 import numpy as np
 from numpy import asarray, transpose, tri
-import tensorflow as tf
 from PIL import Image as ImagePIL
 from PIL import ImageTk
 import sys

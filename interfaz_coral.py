@@ -1,6 +1,7 @@
 from cProfile import label
 from cgitb import text
 from ctypes import resize
+from mimetypes import common_types
 from tkinter import scrolledtext
 import numpy as np
 from numpy import asarray, transpose, tri
@@ -17,6 +18,8 @@ from tkinter import *
 # from pycoral.utils import edgetpu
 # from pycoral.utils import dataset 
 
+
+#No funcionan los comandos en los botones
 
 script_dir = Path(__file__).parent.absolute()
 assets_path = script_dir / Path("./assets")
@@ -66,13 +69,17 @@ def inferencia(img):
 #def relative_to_assets(path: str) -> Path:
  #   return ASSETS_PATH / Path(path)
 
+#Cargar etiquetass
 def load_labels(filename):
   with open(filename, 'r') as f:
     return [line.strip() for line in f.readlines()]
 
-
+def start_inferencia():
+    global flag_inferencia
+    print("inferencia started")
+    flag_inferencia=1
 def main():
-    global window, cap
+    global window, cap, flag_inferencia
     window = Tk()
     # myframe = Frame(window)
     # myframe.pack(fill=BOTH, expand=YES)
@@ -80,6 +87,7 @@ def main():
     #     myframe, width=1920, height=1080, bg="#1E1E1E", highlightthickness=0)
     # mycanvas.pack(fill=BOTH, expand=YES)
     cap = cv2.VideoCapture(0)
+    flag_inferencia = 0
 
    #llamada a las labels
     global labels
@@ -165,29 +173,35 @@ def main():
     window.columnconfigure(3, weight=1, minsize=200)
     window.rowconfigure(3, weight=1, minsize=300)
 
+    button_array = []
     # No son botones de esta forma, me da error si lo meto con Button, parece porque
     # se mezcla .grid y .pack en algun momento.
     for i in range(3):
         frame = Frame(master=window, borderwidth=0, relief=FLAT)
         frame.grid(row=i, column=2)
-        label = Button(
+        Button1 = Button(
             master=frame, image=image_list[i], width=400, height=120)
-        if i == 1:
-            label.command = lambda: window.quit(),
+        #Asignar commando a los botones. 
+        # if i == 1:
+        #     label.command = lambda: window.quit(),
         # if i == 2:
         #     label.command = show_inferencia
-        label.pack()
+        button_array.append(Button1)
+        Button1.pack(expand=True)
 
-    huecos_frame = []
+    button_array[1].configure(command = window.destroy)
+    button_array[0].configure(command = start_inferencia)
     labels_array_fondos = []
 
     for i in range(3, len(image_list)):
         frame = Frame(master=window, relief=RAISED,
                       borderwidth=1, )
         frame.grid(row=i-3, column=1, sticky="nsew")
-        label = Label(master=frame,image=image_list[i], width=480, height=320, text="array label", compound='center', font=("Arial",25),fg='#21ab4b')
+        label = Label(master=frame,image=image_list[i], width=480, height=320, text="array label", compound='center', font=("Arial",14),fg='#21ab4b')
         labels_array_fondos.append(label)
         label.pack()
+
+    
 
     # Definir el frame de la webcam
     framewebcam = Frame(master=window, width=640, height=480)
@@ -205,10 +219,14 @@ def main():
         frame1 = ImageTk.PhotoImage(framePIL)
         vidLabel.configure(image=frame1)
         vidLabel.image = frame1
-        #Hacer la inferencia de la imagen PIL
-        res_inferencia= inferencia(framePIL)
-        print(res_inferencia)
-        labels_array_fondos[0].configure(text=res_inferencia)
+
+        if flag_inferencia ==1:
+            #Hacer la inferencia de la imagen PIL
+            res_inferencia = inferencia(framePIL)
+            x = res_inferencia.split("\n")
+            #print(x[0])
+            labels_array_fondos[0].configure(text=x[0])        
+            labels_array_fondos[1].configure(text=x[1])
 
         window.update_idletasks()
         window.update()
