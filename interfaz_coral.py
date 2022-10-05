@@ -85,13 +85,14 @@ def start_inferencia():
 
 def main():
     global window, cap, flag_inferencia
+    flag_inferencia=0
     window = Tk()
     # myframe = Frame(window)
     # myframe.pack(fill=BOTH, expand=YES)
     # mycanvas = ResizingCanvas(
     #     myframe, width=1920, height=1080, bg="#1E1E1E", highlightthickness=0)
     # mycanvas.pack(fill=BOTH, expand=YES)
-#     cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0)
 
    #llamada a las labels
     global labels
