@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream
 # grid1 sin comentarios solo el codigo mas claro
 
 from cProfile import label
@@ -168,3 +169,5 @@ def main():
 # Ejecucion
 if __name__ == "__main__":
     main()
+=======
+>>>>>>> Stashed changes
