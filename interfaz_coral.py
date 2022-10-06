@@ -23,9 +23,6 @@ import tflite_runtime.interpreter as tflite
 # from pycoral.utils import edgetpu
 # from pycoral.utils import dataset 
 
-
-#No funcionan los comandos en los botones
-
 script_dir = Path(__file__).parent.absolute()
 assets_path = script_dir / Path("./assets")
 print(assets_path)
@@ -74,8 +71,8 @@ def inferencia(img):
 #def relative_to_assets(path: str) -> Path:
  #   return ASSETS_PATH / Path(path)
 
-#Cargar etiquetass
-def load_labels(filename):
+#Load labels from file
+def load_labels(filename: str):
   with open(filename, 'r') as f:
     return [line.strip() for line in f.readlines()]
 
@@ -84,22 +81,27 @@ def start_inferencia():
     print("inferencia started")
     flag_inferencia=1
 
+
 def main():
     global window, cap, flag_inferencia
     flag_inferencia=0
     window = Tk()
+
+    #Another way to make the interface resizable or responsive
     # myframe = Frame(window)
     # myframe.pack(fill=BOTH, expand=YES)
     # mycanvas = ResizingCanvas(
     #     myframe, width=1920, height=1080, bg="#1E1E1E", highlightthickness=0)
     # mycanvas.pack(fill=BOTH, expand=YES)
+
+    #Camera asigned
     cap = cv2.VideoCapture(0)
 
-   #llamada a las labels
+    #Labels for the model
     global labels
     labels=load_labels("./ImageNetLabels.txt")
 
-    #Inferencia
+    #Inference
     global interpreter, input_details, output_details
     interpreter = tflite.Interpreter("./lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite", 
         experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
@@ -112,17 +114,9 @@ def main():
     size = [width, height]
 
 
-    # Definicion de los botones y cuadros de la interfaz
-    # button_image_3 = PhotoImage(file="./assets/button_3.png")
-    # button_3 = Button(
-    #     image=button_image_3,
-    #     borderwidth=0,
-    #     highlightthickness=0,
-    #     # command=lambda: trigger(),
-    #     relief="flat"
-    # )
+    # Definition of button and images for the interface
 
-    # Forma de redimensionar las imagenes pero pierden calidad sin antialias
+    #A way to redimension images but they lose quality without antialias method
     img_button3 = ImagePIL.open("./assets/button_3.png")
     button_3 = img_button3.resize((400, 120), ImagePIL.ANTIALIAS)
     button_image_3 = ImageTk.PhotoImage(button_3)
@@ -141,7 +135,7 @@ def main():
     button_3 = img_button3.resize((400, 120), ImagePIL.ANTIALIAS)
     button_image_stop = ImageTk.PhotoImage(button_3)
   
-    # El botón de reseteo
+    # Reset button
     button_image_reset = PhotoImage(file="./assets/button_2.png")
     # button_reset = Button(image=button_image_reset,
     #                       borderwidth=0,
@@ -155,7 +149,7 @@ def main():
     button_image_reset = ImageTk.PhotoImage(button_2)
 
 
-    #Carga de las imagenes de backgroud
+    #Loading of the backgrounds images
     image_image_central = PhotoImage(
         file="assets/image_1.png")
 
@@ -168,12 +162,12 @@ def main():
     image_image_crop = PhotoImage(
         file="./assets/image_6.png")
 
-    # frame para organizar
+    # List for organizing the images. 
 
     image_list = [button_image_3, button_image_stop, button_image_reset, image_image_grafica_1,
                   image_image_grafica_2, image_image_crop]
 
-    # Tamano minimo de las columnas y filas.
+    # Min size for rows and columns
     window.columnconfigure(1, weight=1, minsize=200)
     window.rowconfigure(1, weight=1, minsize=300)
     window.columnconfigure(2, weight=1, minsize=200)
@@ -182,25 +176,23 @@ def main():
     window.rowconfigure(3, weight=1, minsize=300)
 
     button_array = []
-    # No son botones de esta forma, me da error si lo meto con Button, parece porque
-    # se mezcla .grid y .pack en algun momento.
+    
+    #
+    # You have to grid the frame and the use pack. 
     for i in range(3):
         frame = Frame(master=window, borderwidth=0, relief=FLAT)
         frame.grid(row=i, column=2)
         Button1 = Button(
             master=frame, image=image_list[i], width=400, height=120)
-        #Asignar commando a los botones. 
-        # if i == 1:
-        #     label.command = lambda: window.quit(),
-        # if i == 2:
-        #     label.command = show_inferencia
         button_array.append(Button1)
         Button1.pack(expand=True)
 
+    #Here we assign commands to the button,the first one close the interface, the  trigger button starts infering from the webcam image
     button_array[1].configure(command = window.destroy)
     button_array[0].configure(command = start_inferencia)
     labels_array_fondos = []
 
+    #Tkinter frames for labels
     for i in range(3, len(image_list)):
         frame = Frame(master=window, relief=RAISED,
                       borderwidth=1, )
@@ -211,7 +203,7 @@ def main():
 
     
 
-    # Definir el frame de la webcam
+    # Frame for webcam video
     framewebcam = Frame(master=window, width=640, height=480)
     framewebcam.grid(row=0, column=0, rowspan=3)
     vidLabel = Label(master=framewebcam,
@@ -219,10 +211,10 @@ def main():
                      )
     vidLabel.pack()
 
-    # bucle de lectura de la webcam
+    # Loop for obtainign image from webcam and performing the inference
     while True:
         cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
-        #imagen de testeo, si no tengo webcam
+        #In case of having no webcam, fixed image
         # framePIL = ImagePIL.open("./assets/índice.jpeg")
         framePIL = ImagePIL.fromarray(cv2image)
         #Convert image to Photoimage
@@ -230,8 +222,9 @@ def main():
         vidLabel.configure(image=frame1)
         vidLabel.image = frame1
 
+        #When the trigger button is pressed
         if flag_inferencia ==1:
-            #Hacer la inferencia de la imagen PIL
+            #Make inference from PIL image
             res_inferencia = inferencia(framePIL)
             x = res_inferencia.split("\n")
             #print(x[0])
