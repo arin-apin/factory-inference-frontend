@@ -1,7 +1,7 @@
-<<<<<<< Updated upstream
 from cProfile import label
 from cgitb import text
 from ctypes import resize
+from mimetypes import common_types
 from tkinter import scrolledtext
 import numpy as np
 from numpy import asarray, transpose, tri
@@ -12,11 +12,18 @@ import cv2
 import os
 from pathlib import Path
 from tkinter import *
-from pycoral.adapters import common
-from pycoral.adapters import clasify
-from pycoral.utils import edgetpu
-from pycoral.utils import dataset 
 
+
+ #https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
+import tflite_runtime.interpreter as tflite
+
+# from pycoral.adapters import common
+# from pycoral.adapters import common
+# from pycoral.utils import edgetpu
+# from pycoral.utils import dataset 
+
+
+#No funcionan los comandos en los botones
 
 script_dir = Path(__file__).parent.absolute()
 assets_path = script_dir / Path("./assets")
@@ -66,20 +73,27 @@ def inferencia(img):
 #def relative_to_assets(path: str) -> Path:
  #   return ASSETS_PATH / Path(path)
 
+#Cargar etiquetass
 def load_labels(filename):
   with open(filename, 'r') as f:
     return [line.strip() for line in f.readlines()]
 
+def start_inferencia():
+    global flag_inferencia
+    print("inferencia started")
+    flag_inferencia=1
 
 def main():
-    global window, cap
+    global window, cap, flag_inferencia
     window = Tk()
     # myframe = Frame(window)
     # myframe.pack(fill=BOTH, expand=YES)
     # mycanvas = ResizingCanvas(
     #     myframe, width=1920, height=1080, bg="#1E1E1E", highlightthickness=0)
     # mycanvas.pack(fill=BOTH, expand=YES)
-    cap = cv2.VideoCapture(0)
+
+     #activar la camara cuando tenga el dispositivo
+#     cap = cv2.VideoCapture(0)
 
    #llamada a las labels
     global labels
@@ -87,9 +101,9 @@ def main():
 
     #Inferencia
     global interpreter, input_details, output_details
-    interpreter = edgetpu.make_interpreter(model_file)
+    interpreter = tflite.Interpreter("./lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite", 
+        experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
     interpreter.allocate_tensors()
-
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
     _, height, width, _ = interpreter.get_input_details()[0]['shape']
@@ -109,11 +123,11 @@ def main():
     # )
 
     # Forma de redimensionar las imagenes pero pierden calidad sin antialias
-    img_button3 = ImagePIL.open(os.path.join(assets_path,"button_3.png"))
+    img_button3 = ImagePIL.open("./assets/button_3.png")
     button_3 = img_button3.resize((400, 120), ImagePIL.ANTIALIAS)
     button_image_3 = ImageTk.PhotoImage(button_3)
 
-    #button_image_stop = PhotoImage(file="./assets/button_1.png")
+    button_image_stop = PhotoImage(file="./assets/button_1.png")
     # button_stop = Button(image=button_image_stop,
     #                      borderwidth=0,
     #                      highlightthickness=0,
@@ -123,11 +137,12 @@ def main():
     # button_stop.configure(width=343, activebackground="#33B5E5", relief=FLAT)
 
 
-    img_button3 = ImagePIL.open(os.path.join(assets_path,"button_1.png"))
+    img_button3 = ImagePIL.open((os.path.join(assets_path,"button_1.png")))
     button_3 = img_button3.resize((400, 120), ImagePIL.ANTIALIAS)
     button_image_stop = ImageTk.PhotoImage(button_3)
-
-    # button_image_reset = PhotoImage(file="./assets/button_2.png")
+  
+    # El botón de reseteo
+    button_image_reset = PhotoImage(file="./assets/button_2.png")
     # button_reset = Button(image=button_image_reset,
     #                       borderwidth=0,
     #                       highlightthickness=0,
@@ -135,23 +150,23 @@ def main():
     #                       relief="flat"
     #                       )
 
-    img_button2 = ImagePIL.open(os.path.join(assets_path,"button_2.png"))
+    img_button2 = ImagePIL.open("./assets/button_2.png")
     button_2 = img_button2.resize((400 , 120), ImagePIL.ANTIALIAS)
     button_image_reset = ImageTk.PhotoImage(button_2)
 
 
     #Carga de las imagenes de backgroud
     image_image_central = PhotoImage(
-        file=os.path.join((assets_path,"image_1.png")))
+        file="assets/image_1.png")
 
     image_image_grafica_1 = PhotoImage(
-        file= os.path.join((assets_path,"foo.png")))
+        file="./assets/foo.png")
 
     image_image_grafica_2 = PhotoImage(
-        file=os.path.join((assets_path,"foo2.png")))
+        file="./assets/foo2.png")
 
     image_image_crop = PhotoImage(
-        file=os.path.join((assets_path,"image_6.png")))
+        file="./assets/image_6.png")
 
     # frame para organizar
 
@@ -166,29 +181,35 @@ def main():
     window.columnconfigure(3, weight=1, minsize=200)
     window.rowconfigure(3, weight=1, minsize=300)
 
+    button_array = []
     # No son botones de esta forma, me da error si lo meto con Button, parece porque
     # se mezcla .grid y .pack en algun momento.
     for i in range(3):
         frame = Frame(master=window, borderwidth=0, relief=FLAT)
         frame.grid(row=i, column=2)
-        label = Button(
+        Button1 = Button(
             master=frame, image=image_list[i], width=400, height=120)
-        if i == 1:
-            label.command = lambda: window.quit(),
+        #Asignar commando a los botones. 
+        # if i == 1:
+        #     label.command = lambda: window.quit(),
         # if i == 2:
         #     label.command = show_inferencia
-        label.pack()
+        button_array.append(Button1)
+        Button1.pack(expand=True)
 
-    huecos_frame = []
+    button_array[1].configure(command = window.destroy)
+    button_array[0].configure(command = start_inferencia)
     labels_array_fondos = []
 
     for i in range(3, len(image_list)):
         frame = Frame(master=window, relief=RAISED,
                       borderwidth=1, )
         frame.grid(row=i-3, column=1, sticky="nsew")
-        label = Label(master=frame,image=image_list[i], width=480, height=320, text="array label", compound='center', font=("Arial",25),fg='#21ab4b'ssh-keygen -y -f ~/.ssh/id_rsa > ~/.ssh/id_rsa.pub)
+        label = Label(master=frame,image=image_list[i], width=480, height=320, text="array label", compound='center', font=("Arial",14),fg='#21ab4b')
         labels_array_fondos.append(label)
         label.pack()
+
+    
 
     # Definir el frame de la webcam
     framewebcam = Frame(master=window, width=640, height=480)
@@ -201,15 +222,22 @@ def main():
     # bucle de lectura de la webcam
     while True:
         cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
-        framePIL = ImagePIL.fromarray(cv2image)
+        #imagen de testeo, si no tengo webcam
+        framePIL = ImagePIL.open("./assets/índice.jpeg")
+        #framePIL = ImagePIL.fromarray(cv2image)
         #Convert image to Photoimage
         frame1 = ImageTk.PhotoImage(framePIL)
         vidLabel.configure(image=frame1)
         vidLabel.image = frame1
-        #Hacer la inferencia de la imagen PIL
-        res_inferencia= inferencia(framePIL)
-        print(res_inferencia)
-        labels_array_fondos[0].configure(text=res_inferencia)
+
+        if flag_inferencia ==1:
+            #Hacer la inferencia de la imagen PIL
+            res_inferencia = inferencia(framePIL)
+            x = res_inferencia.split("\n")
+            #print(x[0])
+            labels_array_fondos[0].configure(text=x[0])        
+            labels_array_fondos[1].configure(text=x[1])
+
         window.update_idletasks()
         window.update()
 
@@ -217,5 +245,3 @@ def main():
 # Ejecucion
 if __name__ == "__main__":
     main()
-=======
->>>>>>> Stashed changes

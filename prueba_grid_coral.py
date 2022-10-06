@@ -1,4 +1,3 @@
-<<<<<<< Updated upstream
 # grid1 sin comentarios solo el codigo mas claro
 
 from cProfile import label
@@ -9,7 +8,6 @@ from PIL import Image as ImagePIL
 from PIL import ImageTk
 import sys
 import time
-import cv2
 from pathlib import Path
 from tkinter import *
 
@@ -34,16 +32,19 @@ class ResizingCanvas(Canvas):
         # rescale all the objects tagged with the "all" tag
         self.scale("all", 0, 0, wscale, hscale)
 
+def start_inferencia():
+    global flag_inferencia
+    print("inferencia started")
+    flag_inferencia=1
 
 def main():
-    global window, cap
+    global window, cap, flag_inferencia
     window = Tk()
     # myframe = Frame(window)
     # myframe.pack(fill=BOTH, expand=YES)
     # mycanvas = ResizingCanvas(
     #     myframe, width=1920, height=1080, bg="#1E1E1E", highlightthickness=0)
     # mycanvas.pack(fill=BOTH, expand=YES)
-    cap = cv2.VideoCapture(0)
 
     # Usar ttk para importar un estilo
     #s = ttk.Style()
@@ -132,6 +133,10 @@ def main():
             label.command = lambda: window.quit(),
         label.pack()
 
+    button_array[1].configure(command = window.destroy)
+    button_array[0].configure(command = start_inferencia)
+    labels_array_fondos = []
+
     for i in range(3, len(image_list)):
         frame = Frame(master=window, relief=RAISED,
                       borderwidth=1, )
@@ -152,13 +157,13 @@ def main():
     while True:
 
         # segundo metodo
-        cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
+        # cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
 
-        frame1 = ImagePIL.fromarray(cv2image)
+        # frame1 = ImagePIL.fromarray(cv2image)
 
-        frame1 = ImageTk.PhotoImage(frame1)
-        vidLabel.configure(image=frame1)
-        vidLabel.image = frame1
+        # frame1 = ImageTk.PhotoImage(frame1)
+        # vidLabel.configure(image=frame1)
+        # vidLabel.image = frame1
 
         # print(inferencia(img))
         window.update_idletasks()
@@ -168,5 +173,3 @@ def main():
 # Ejecucion
 if __name__ == "__main__":
     main()
-=======
->>>>>>> Stashed changes
