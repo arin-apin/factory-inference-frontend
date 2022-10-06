@@ -1,4 +1,4 @@
-<<<<<<< Updated upstream
+
 from cProfile import label
 from cgitb import text
 from ctypes import resize
@@ -238,5 +238,4 @@ def main():
 # Ejecucion
 if __name__ == "__main__":
     main()
-=======
->>>>>>> Stashed changes
+

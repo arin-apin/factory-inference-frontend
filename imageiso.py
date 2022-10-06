@@ -16,4 +16,7 @@ def model():
 
     #h
 
-def path():
+def model_load(model: str label: str):
+    print("HEllo world")
+
+
