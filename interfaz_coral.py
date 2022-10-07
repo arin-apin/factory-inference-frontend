@@ -104,6 +104,10 @@ def main():
     global interpreter, input_details, output_details
     interpreter = tflite.Interpreter("./lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite", 
         experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
+    
+    #interpreter = tflite.Interpreter("./converted_model.tflite", 
+    #    experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
+    
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
@@ -212,10 +216,10 @@ def main():
 
     # Loop for obtainign image from webcam and performing the inference
     while True:
-        cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
+        #cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
         #In case of having no webcam, fixed image
-        # framePIL = ImagePIL.open("./assets/índice.jpeg")
-        framePIL = ImagePIL.fromarray(cv2image)
+        framePIL = ImagePIL.open("./assets/000072.jpg")
+        #framePIL = ImagePIL.fromarray(cv2image)
         #Convert image to Photoimage
         frame1 = ImageTk.PhotoImage(framePIL)
         vidLabel.configure(image=frame1)
@@ -237,4 +241,3 @@ def main():
 # Ejecucion
 if __name__ == "__main__":
     main()
-

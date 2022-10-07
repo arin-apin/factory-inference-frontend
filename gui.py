@@ -84,7 +84,7 @@ def main():
 
     #Inferencia
     global interpreter, input_details, output_details
-    interpreter = tf.lite.Interpreter("./lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite")
+    interpreter = tf.lite.Interpreter("./converted_model.tflite")
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
@@ -168,8 +168,9 @@ def main():
     # tag all of the drawn widgets
     mycanvas.addtag_all("all")
     while True:
-        cv2image= cv2.cvtColor(cap.read()[1],cv2.COLOR_BGR2RGB)
-        img = ImagePIL.fromarray(cv2image)
+        #cv2image= cv2.cvtColor(cap.read()[1],cv2.COLOR_BGR2RGB)
+        img = ImagePIL.open("./assets/000072.jpg")
+        #img = ImagePIL.fromarray(cv2image)
         # Convert image to PhotoImage
         image_image_central=ImageTk.PhotoImage(image = img)
         mycanvas.itemconfig(image_central, image=image_image_central, tag=all)
