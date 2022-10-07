@@ -18,7 +18,7 @@ if __name__ == "__main__":
 
     #We create a folder for the corresponding 
 
-    #U
+    #Note: Only one image per client, this will be changed in the future
     if client_id  no tiene carpeta -> crear carpeta.callable    
             otherwise meter en carpeta
 #Create client
