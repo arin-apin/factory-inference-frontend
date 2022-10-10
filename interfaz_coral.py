@@ -49,8 +49,7 @@ class ResizingCanvas(Canvas):
         # rescale all the objects tagged with the "all" tag
         self.scale("all", 0, 0, wscale, hscale)
 
-def inferencia(img):
-
+def inference(img):
     global size
     inicio=time.time()
     img= img.convert('RGB').resize(size, ImagePIL.ANTIALIAS)
@@ -63,7 +62,7 @@ def inferencia(img):
     top_k = tensor_resultado.argsort()[-5:][::-1]
     for i in top_k:
         resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
-    resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
+    resultado=resultado+"Tiempo inference: "+str(time.time()-inicio)
     return resultado
 
 
@@ -75,15 +74,15 @@ def load_labels(filename: str):
   with open(filename, 'r') as f:
     return [line.strip() for line in f.readlines()]
 
-def start_inferencia():
-    global flag_inferencia
-    print("inferencia started")
-    flag_inferencia=1
+def start_inference():
+    global flag_inference
+    print("inference started")
+    flag_inference=1
 
 
 def main():
-    global window, cap, flag_inferencia
-    flag_inferencia=0
+    global window, cap, flag_inference
+    flag_inference=0
     window = Tk()
 
     #Another way to make the interface resizable or responsive
@@ -192,7 +191,7 @@ def main():
 
     #Here we assign commands to the button,the first one close the interface, the  trigger button starts infering from the webcam image
     button_array[1].configure(command = window.destroy)
-    button_array[0].configure(command = start_inferencia)
+    button_array[0].configure(command = start_inference)
     labels_array_fondos = []
 
     #Tkinter frames for labels
@@ -216,20 +215,20 @@ def main():
 
     # Loop for obtainign image from webcam and performing the inference
     while True:
-        #cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
+        cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
         #In case of having no webcam, fixed image
-        framePIL = ImagePIL.open("./assets/000072.jpg")
-        #framePIL = ImagePIL.fromarray(cv2image)
+        #framePIL = ImagePIL.open("./assets/000072.jpg")
+        framePIL = ImagePIL.fromarray(cv2image)
         #Convert image to Photoimage
         frame1 = ImageTk.PhotoImage(framePIL)
         vidLabel.configure(image=frame1)
         vidLabel.image = frame1
 
         #When the trigger button is pressed
-        if flag_inferencia ==1:
+        if flag_inference ==1:
             #Make inference from PIL image
-            res_inferencia = inferencia(framePIL)
-            x = res_inferencia.split("\n")
+            res_inference = inference(framePIL)
+            x = res_inference.split("\n")
             #print(x[0])
             labels_array_fondos[0].configure(text=x[0])        
             labels_array_fondos[1].configure(text=x[1])

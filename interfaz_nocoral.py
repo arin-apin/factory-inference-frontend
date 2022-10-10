@@ -13,6 +13,7 @@ import cv2
 import os
 from pathlib import Path
 from tkinter import *
+import matplotlib.pyplot as plt
 
 
 
@@ -43,21 +44,31 @@ class ResizingCanvas(Canvas):
         # rescale all the objects tagged with the "all" tag
         self.scale("all", 0, 0, wscale, hscale)
 
-def inferencia(img):
+def inference(img):
 
     global size
     inicio=time.time()
-    img= img.convert('RGB').resize(size, ImagePIL.ANTIALIAS)
-    input_data = np.array(asarray(img), dtype=np.float32)
+    img= img.convert('RGB').resize(size, ImagePIL.Resampling.LANCZOS)
+    #input_data = np.array(asarray(img), dtype=np.float32)
+    input_data = np.array(asarray(img), dtype=np.uint8)
     input_data = np.expand_dims(input_data , axis=0)
     interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     tensor_resultado= interpreter.get_tensor(output_details[0]['index'])[0]
-
     top_k = tensor_resultado.argsort()[-5:][::-1]
+
+    print("Tensor_resultado")
+    print(top_k)
+    #Return results
     for i in top_k:
-        resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
+    #Para clasificación de imagen
+    #   resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
+    #Para labelling
+        resultado="testing"
+        #resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
+
     resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
+
     return resultado
 
 
@@ -212,7 +223,16 @@ def main():
         #cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
         #In case of having no webcam, fixed image
         framePIL = ImagePIL.open("./assets/000072.jpg")
-        
+        print(framePIL.format)
+
+        #La imagen es de tipo JPEG, abrir con matplotlib.imread para convertir a pixel intesity values (uint8)
+        #img1 = plt.imread('./assets/000072.jpg')
+        #print type y transformar
+        #print('Data Type:', img1.dtype)
+        #Imagen_UINT8= framePIL*255
+        #I= I.astype(np.uint8)
+
+
         #framePIL = ImagePIL.fromarray(cv2image)
         #Convert image to Photoimage
         frame1 = ImageTk.PhotoImage(framePIL)
@@ -223,7 +243,8 @@ def main():
         #When the trigger button is pressed
         if flag_inferencia ==1:
             #Make inference from PIL image
-            res_inferencia = inferencia(framePIL)
+            res_inferencia = inference(framePIL)
+            #res_inferencia = inferencia(img1)
             x = res_inferencia.split("\n")
             #print(x[0])
             labels_array_fondos[0].configure(text=x[0])        
