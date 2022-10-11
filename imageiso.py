@@ -1,5 +1,5 @@
 #Esta es la versión a utilizar, no hay que usar cloud function
-#Este script va a obtener el modelo y las labels del cliente. 
+#This script is going to obtain the model and labels for the client
 import sys
 import os
 import subprocess
