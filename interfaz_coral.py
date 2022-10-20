@@ -14,7 +14,7 @@ from pathlib import Path
 from tkinter import *
 
 
- #https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
+#https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
 import tflite_runtime.interpreter as tflite
 
 # from pycoral.adapters import common
