@@ -7,6 +7,17 @@ import shutil
 from importlib.resources import path
 from google.cloud import storage
 from google.cloud import firestore
+from firebase_admin import credentials, initialize_app, storage
+import glob
+
+creds = credentials.Certificate("/home/mario3/arinapin/python/api-key-dracones02.json")
+initialize_app(creds, {'storageBucket':'mvp-arin'})
+ 
+#export PROJECT_PATH="clients/q6FvDq3pIxV4sVjE7qZfCTSn9Wx2/URirWG09ZYWzRwqdA9vm"
+#export GOOGLE_APPLICATION_CREDENTIALS=/home/mario/arinapin/api-key-dracones02.json
+
+files = glob.glob('/home/mario3/')
+
 
 if __name__ == "__main__":
     #Argument count

@@ -85,6 +85,7 @@ def start_inferencia():
 
 def main():
     global window, cap, flag_inferencia
+    flag_inferencia=0
     window = Tk()
     # myframe = Frame(window)
     # myframe.pack(fill=BOTH, expand=YES)
@@ -93,16 +94,27 @@ def main():
     # mycanvas.pack(fill=BOTH, expand=YES)
 
      #activar la camara cuando tenga el dispositivo
-#     cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0)
+    
+    global labels
+
+    #get the files, this only work with one filetype 
+    for file in os.listdir():
+        if file.endswith('tflite'):
+            model=file
+            print("model found: ",model)
+        if file.endswith('txt'):
+            labels_path=file
+            print("label found: ", labels_path)
 
    #llamada a las labels
-    global labels
-    labels=load_labels("./ImageNetLabels.txt")
+    
+    labels=load_labels(labels_path)
 
     #Inferencia
     global interpreter, input_details, output_details
-    interpreter = tflite.Interpreter("./lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite", 
-        experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
+    interpreter = tflite.Interpreter(model)
+        #experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
@@ -230,7 +242,7 @@ def main():
         vidLabel.configure(image=frame1)
         vidLabel.image = frame1
 
-        if flag_inferencia ==1:
+        if flag_inferencia == 1:
             #Hacer la inferencia de la imagen PIL
             res_inferencia = inferencia(framePIL)
             x = res_inferencia.split("\n")
