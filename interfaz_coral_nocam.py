@@ -57,7 +57,7 @@ def inferencia(img):
     img= img.convert('RGB').resize(size, ImagePIL.ANTIALIAS)
     input_data = np.array(asarray(img), dtype=np.float32)
     input_data = np.expand_dims(input_data , axis=0)
-    floating_model = input_details[0]['dtype'] == np.float32
+    #floating_model = input_details[0]['dtype'] == np.float32
     # if floating_model:
     #     input_data = (np.float32(input_data) - 127.5) / 127.5
 
@@ -65,17 +65,23 @@ def inferencia(img):
     interpreter.invoke()
     tensor_resultado= interpreter.get_tensor(output_details[0]['index'])[0]
 
-    print(floating_model)
     results = np.squeeze(tensor_resultado)
-    print(results)
-    print(tensor_resultado)
+    #print(results)
+    #print(tensor_resultado)
 
     #Lo de [::-1] es un "truco" frecuentemente usado en python para
     #  obtener una lista o una cadena "del revés". Se basa en el operador slice (rodaja) cuya sintaxis general es:
     top_k= results.argsort()[-5:][::-1]
 
-    for i in range(len(labels)):
-        print('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))
+    #We get the top 5 results 
+    resultado=''
+    #print(top_k)
+    for i in top_k:
+        resultado+=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
+    resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
+    #print(resultado, '\n')
+    resultado_max= resultado.partition('\n')[0]+'\n'+ resultado.split('\n')[-1] 
+    return resultado_max, resultado
 
 
     # for i in top_k:
@@ -272,7 +278,7 @@ def main():
 
         if flag_inferencia == 1:
             #Hacer la inferencia de la imagen PIL
-            res_inferencia = inferencia(framePIL)
+            res_inferencia, res_total = inferencia(framePIL)
             x = res_inferencia.split("\n")
             #print(x[0])
             labels_array_fondos[0].configure(text=x[0])        

@@ -104,15 +104,15 @@ def inferencia(img, model, labels):
      #print(top_k)
      # for i in range(len(labels)):
      #     print('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))
-     index = (len(top_k))-1
-     #print(index)
-     resultado_max=('{:08.6f}: {}'.format(float(tensor_resultado[index]), labels[index]))+"\n"
+    #We get the top 5 results 
      resultado=''
      #print(top_k)
      for i in top_k:
         resultado+=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
      resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
-     return resultado, resultado_max
+     #print(resultado, '\n')
+     resultado_max= resultado.partition('\n')[0]+'\n'+ resultado.split('\n')[-1] 
+     return resultado_max, resultado
 
   
 

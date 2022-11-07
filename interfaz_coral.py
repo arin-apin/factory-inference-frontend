@@ -17,10 +17,6 @@ from tkinter import *
 #https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
 import tflite_runtime.interpreter as tflite
 
-# from pycoral.adapters import common
-# from pycoral.adapters import common
-# from pycoral.utils import edgetpu
-# from pycoral.utils import dataset 
 
 script_dir = Path(__file__).parent.absolute()
 assets_path = script_dir / Path("./assets")
@@ -61,10 +57,15 @@ def inferencia(img):
     tensor_resultado= interpreter.get_tensor(output_details[0]['index'])[0]
 
     top_k = tensor_resultado.argsort()[-5:][::-1]
+    #We get the top 5 results 
+    resultado=''
+    #print(top_k)
     for i in top_k:
-        resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
+        resultado+=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
     resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
-    return resultado
+    #print(resultado, '\n')
+    resultado_max= resultado.partition('\n')[0]+'\n'+ resultado.split('\n')[-1] 
+    return resultado_max, resultado
 
 
 #def relative_to_assets(path: str) -> Path:
@@ -233,7 +234,7 @@ def main():
         #When the trigger button is pressed
         if flag_inferencia ==1:
             #Make inference from PIL image
-            res_inferencia = inferencia(framePIL)
+            res_inferencia, res_total = inferencia(framePIL)
             x = res_inferencia.split("\n")
             #print(x[0])
             labels_array_fondos[0].configure(text=x[0])        
