@@ -14,16 +14,14 @@ from pathlib import Path
 from tkinter import *
 
 
-#https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
 import tflite_runtime.interpreter as tflite
 
 
 script_dir = Path(__file__).parent.absolute()
 assets_path = script_dir / Path("./assets")
 print(assets_path)
-
-model_file = os.path.join(script_dir, 'lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite')
-label_file = os.path.join(script_dir, "ImageNetLabels.txt")
+#model_file = os.path.join(script_dir, 'lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite')
+#label_file = os.path.join(script_dir, "ImageNetLabels.txt")
 
 
 # Subclass of Canvas para resizing
@@ -45,6 +43,7 @@ class ResizingCanvas(Canvas):
         # rescale all the objects tagged with the "all" tag
         self.scale("all", 0, 0, wscale, hscale)
 
+#Function for performing the inference from the captured image.
 def inference(img):
     global size
     inicio=time.time()
@@ -149,13 +148,6 @@ def main():
   
     # Reset button
     button_image_reset = PhotoImage(file="./assets/button_2.png")
-    # button_reset = Button(image=button_image_reset,
-    #                       borderwidth=0,
-    #                       highlightthickness=0,
-    #                       # command=lambda: os.rename(files[file_pointer],files[file_pointer]+'_'),
-    #                       relief="flat"
-    #                       )
-
     img_button2 = ImagePIL.open("./assets/button_2.png")
     button_2 = img_button2.resize((400 , 120), ImagePIL.ANTIALIAS)
     button_image_reset = ImageTk.PhotoImage(button_2)

@@ -12,9 +12,10 @@ import cv2
 import os
 from pathlib import Path
 from tkinter import *
-
- #https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
 import tflite_runtime.interpreter as tflite
+
+#For updating code to work on coral check 
+#https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
 
 # from pycoral.adapters import common
 # from pycoral.adapters import common
@@ -52,8 +53,6 @@ def inferencia(img):
 
     global size
     inicio=time.time()
-
-    
     img= img.convert('RGB').resize(size, ImagePIL.ANTIALIAS)
     input_data = np.array(asarray(img), dtype=np.float32)
     input_data = np.expand_dims(input_data , axis=0)
@@ -69,8 +68,7 @@ def inferencia(img):
     #print(results)
     #print(tensor_resultado)
 
-    #Lo de [::-1] es un "truco" frecuentemente usado en python para
-    #  obtener una lista o una cadena "del revés". Se basa en el operador slice (rodaja) cuya sintaxis general es:
+    #[::-1] is a trick in python to obtain a list in the opposite order. 
     top_k= results.argsort()[-5:][::-1]
 
     #We get the top 5 results 
@@ -95,19 +93,11 @@ def inferencia(img):
     # print(resultado)
     # return resultado
 
-    # top_k = tensor_resultado.argsort()[-5:][::-1]
-    # print(top_k)
-    # for i in top_k:
-    #     resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
-    # resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
-    # print(resultado)
-    # return resultado
-
 
 #def relative_to_assets(path: str) -> Path:
  #   return ASSETS_PATH / Path(path)
 
-#Cargar etiquetass
+#load labels from ffile. 
 def load_labels(filename):
   with open(filename, 'r') as f:
     return [line.strip() for line in f.readlines()]
@@ -141,11 +131,10 @@ def main():
             labels_path=file
             print("label found: ", labels_path)
 
-   #llamada a las labels
-    
+   #call labels and obtain them
     labels=load_labels(labels_path)
 
-    #Inferencia
+    #Model
     global interpreter, input_details, output_details
     interpreter = tflite.Interpreter(model)
         #experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
@@ -168,7 +157,7 @@ def main():
     #     relief="flat"
     # )
 
-    # Forma de redimensionar las imagenes pero pierden calidad sin antialias
+    # Redimension the images Forma de redimensionar las imagenes pero pierden calidad sin antialias
     img_button3 = ImagePIL.open("./assets/button_3.png")
     button_3 = img_button3.resize((400, 120), ImagePIL.ANTIALIAS)
     button_image_3 = ImageTk.PhotoImage(button_3)
@@ -187,21 +176,15 @@ def main():
     button_3 = img_button3.resize((400, 120), ImagePIL.ANTIALIAS)
     button_image_stop = ImageTk.PhotoImage(button_3)
   
-    # El botón de reseteo
+    # The reset button
     button_image_reset = PhotoImage(file="./assets/button_2.png")
-    # button_reset = Button(image=button_image_reset,
-    #                       borderwidth=0,
-    #                       highlightthickness=0,
-    #                       # command=lambda: os.rename(files[file_pointer],files[file_pointer]+'_'),
-    #                       relief="flat"
-    #                       )
 
     img_button2 = ImagePIL.open("./assets/button_2.png")
     button_2 = img_button2.resize((400 , 120), ImagePIL.ANTIALIAS)
     button_image_reset = ImageTk.PhotoImage(button_2)
 
 
-    #Carga de las imagenes de backgroud
+    #Loading background images
     image_image_central = PhotoImage(
         file="assets/image_1.png")
 
@@ -214,12 +197,11 @@ def main():
     image_image_crop = PhotoImage(
         file="./assets/image_6.png")
 
-    # frame para organizar
-
+    # List containing all images
     image_list = [button_image_3, button_image_stop, button_image_reset, image_image_grafica_1,
                   image_image_grafica_2, image_image_crop]
 
-    # Tamano minimo de las columnas y filas.
+    # Min sizes for rows and columns
     window.columnconfigure(1, weight=1, minsize=200)
     window.rowconfigure(1, weight=1, minsize=300)
     window.columnconfigure(2, weight=1, minsize=200)
@@ -228,18 +210,12 @@ def main():
     window.rowconfigure(3, weight=1, minsize=300)
 
     button_array = []
-    # No son botones de esta forma, me da error si lo meto con Button, parece porque
-    # se mezcla .grid y .pack en algun momento.
+    #Creating buttons
     for i in range(3):
         frame = Frame(master=window, borderwidth=0, relief=FLAT)
         frame.grid(row=i, column=2)
         Button1 = Button(
             master=frame, image=image_list[i], width=400, height=120)
-        #Asignar commando a los botones. 
-        # if i == 1:
-        #     label.command = lambda: window.quit(),
-        # if i == 2:
-        #     label.command = show_inferencia
         button_array.append(Button1)
         Button1.pack(expand=True)
 
@@ -247,6 +223,7 @@ def main():
     button_array[0].configure(command = start_inferencia)
     labels_array_fondos = []
 
+    #Create frames with labels for the images
     for i in range(3, len(image_list)):
         frame = Frame(master=window, relief=RAISED,
                       borderwidth=1, )
@@ -257,7 +234,7 @@ def main():
 
     
 
-    # Definir el frame de la webcam
+    # Define webcam frame
     framewebcam = Frame(master=window, width=640, height=480)
     framewebcam.grid(row=0, column=0, rowspan=3)
     vidLabel = Label(master=framewebcam,
@@ -265,10 +242,10 @@ def main():
                      )
     vidLabel.pack()
 
-    # bucle de lectura de la webcam
+    # Webcam reading loop
     while True:
         cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
-        #imagen de testeo, si no tengo webcam, es lo que comentar y descomentar la siguiente
+        #iin case of not webcam available, you could use a testing image
         #framePIL = ImagePIL.open("./assets/pinki_fake.jpg")
         framePIL = ImagePIL.fromarray(cv2image)
         #Convert image to Photoimage
@@ -276,8 +253,9 @@ def main():
         vidLabel.configure(image=frame1)
         vidLabel.image = frame1
 
+        #This is active when the trigger button is pressed.
         if flag_inferencia == 1:
-            #Hacer la inferencia de la imagen PIL
+            #Make inference from the PIL image.
             res_inferencia, res_total = inferencia(framePIL)
             x = res_inferencia.split("\n")
             #print(x[0])
