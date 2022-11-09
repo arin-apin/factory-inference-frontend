@@ -1,4 +1,3 @@
-
 # grid1 sin comentarios solo el codigo mas claro
 
 from cProfile import label
@@ -14,7 +13,6 @@ from pathlib import Path
 from tkinter import *
 
 # Subclass of Canvas para resizing
-
 
 class ResizingCanvas(Canvas):
     def __init__(self, parent, **kwargs):
@@ -148,14 +146,13 @@ def main():
                      )
     vidLabel.pack()
 
-    #  webcam
+    # bucle de ledctura de la webcam
     while True:
 
-        
-        #cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
-        #for testing still image
-        frame1 = ImagePIL.open("./assets/000072.jpg")
-        #frame1 = ImagePIL.fromarray(cv2image)
+        # segundo metodo
+        cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
+
+        frame1 = ImagePIL.fromarray(cv2image)
 
         frame1 = ImageTk.PhotoImage(frame1)
         vidLabel.configure(image=frame1)
