@@ -14,13 +14,9 @@ from pathlib import Path
 from tkinter import *
 
 
- #https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
+#https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
 import tflite_runtime.interpreter as tflite
 
-# from pycoral.adapters import common
-# from pycoral.adapters import common
-# from pycoral.utils import edgetpu
-# from pycoral.utils import dataset 
 
 script_dir = Path(__file__).parent.absolute()
 assets_path = script_dir / Path("./assets")
@@ -60,10 +56,15 @@ def inference(img):
     tensor_resultado= interpreter.get_tensor(output_details[0]['index'])[0]
 
     top_k = tensor_resultado.argsort()[-5:][::-1]
+    #We get the top 5 results 
+    resultado=''
+    #print(top_k)
     for i in top_k:
-        resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
-    resultado=resultado+"Tiempo inference: "+str(time.time()-inicio)
-    return resultado
+        resultado+=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
+    resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
+    #print(resultado, '\n')
+    resultado_max= resultado.partition('\n')[0]+'\n'+ resultado.split('\n')[-1] 
+    return resultado_max, resultado
 
 
 #def relative_to_assets(path: str) -> Path:
@@ -97,11 +98,20 @@ def main():
 
     #Labels for the model
     global labels
-    labels=load_labels("./ImageNetLabels.txt")
+
+    for file in os.listdir():
+        if file.endswith('tflite'):
+            model=file
+            print("model found: ",model)
+        if file.endswith('txt'):
+            labels_path=file
+            print("label found: ", labels_path)
+
+    labels=load_labels(labels_path)
 
     #Inference
     global interpreter, input_details, output_details
-    interpreter = tflite.Interpreter("./lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite", 
+    interpreter = tflite.Interpreter(model, 
         experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
     
     #interpreter = tflite.Interpreter("./converted_model.tflite", 
@@ -227,8 +237,8 @@ def main():
         #When the trigger button is pressed
         if flag_inference ==1:
             #Make inference from PIL image
-            res_inference = inference(framePIL)
-            x = res_inference.split("\n")
+            res_inferencia, res_total = inferencia(framePIL)
+            x = res_inferencia.split("\n")
             #print(x[0])
             labels_array_fondos[0].configure(text=x[0])        
             labels_array_fondos[1].configure(text=x[1])

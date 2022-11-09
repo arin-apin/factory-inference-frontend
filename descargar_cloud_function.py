@@ -14,7 +14,7 @@ import json
 
 from descargar_zip_cloud_function import PROJECT_PATH
 
-#Esta es la versión a utilizar en cloudfunction directamente, hay que remplazar el fichero por como estaba, 
+#Esta es la versión a utilizar en cloudfunction directamente, hay que reemplazar el fichero por como estaba, 
 # y poner GCLOUD_PATH donde esta path_file
 
 storage_client = storage.Client()

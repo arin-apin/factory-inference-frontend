@@ -13,7 +13,6 @@ import os
 from pathlib import Path
 from tkinter import *
 
-
  #https://coral.ai/docs/edgetpu/tflite-python/#update-existing-tf-lite-code-for-the-edge-tpu
 import tflite_runtime.interpreter as tflite
 
@@ -21,9 +20,6 @@ import tflite_runtime.interpreter as tflite
 # from pycoral.adapters import common
 # from pycoral.utils import edgetpu
 # from pycoral.utils import dataset 
-
-
-#No funcionan los comandos en los botones
 
 script_dir = Path(__file__).parent.absolute()
 assets_path = script_dir / Path("./assets")
@@ -56,18 +52,56 @@ def inferencia(img):
 
     global size
     inicio=time.time()
+
+    
     img= img.convert('RGB').resize(size, ImagePIL.ANTIALIAS)
     input_data = np.array(asarray(img), dtype=np.float32)
     input_data = np.expand_dims(input_data , axis=0)
+    #floating_model = input_details[0]['dtype'] == np.float32
+    # if floating_model:
+    #     input_data = (np.float32(input_data) - 127.5) / 127.5
+
     interpreter.set_tensor(input_details[0]['index'], input_data)
     interpreter.invoke()
     tensor_resultado= interpreter.get_tensor(output_details[0]['index'])[0]
 
-    top_k = tensor_resultado.argsort()[-5:][::-1]
+    results = np.squeeze(tensor_resultado)
+    #print(results)
+    #print(tensor_resultado)
+
+    #Lo de [::-1] es un "truco" frecuentemente usado en python para
+    #  obtener una lista o una cadena "del revés". Se basa en el operador slice (rodaja) cuya sintaxis general es:
+    top_k= results.argsort()[-5:][::-1]
+
+    #We get the top 5 results 
+    resultado=''
+    #print(top_k)
     for i in top_k:
-        resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
+        resultado+=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
     resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
-    return resultado
+    #print(resultado, '\n')
+    resultado_max= resultado.partition('\n')[0]+'\n'+ resultado.split('\n')[-1] 
+    return resultado_max, resultado
+
+
+    # for i in top_k:
+    #     if floating_model:
+    #         resultado=('{:08.6f}: {}'.format(float(results[i]), labels[i]))+"\n"
+    #     else:
+            
+    #         resultado=('{:08.6f}: {}'.format(float(results[i] / 255.0), labels[i]))+"\n"
+    
+    # resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
+    # print(resultado)
+    # return resultado
+
+    # top_k = tensor_resultado.argsort()[-5:][::-1]
+    # print(top_k)
+    # for i in top_k:
+    #     resultado=('{:08.6f}: {}'.format(float(tensor_resultado[i]), labels[i]))+"\n"
+    # resultado=resultado+"Tiempo inferencia: "+str(time.time()-inicio)
+    # print(resultado)
+    # return resultado
 
 
 #def relative_to_assets(path: str) -> Path:
@@ -85,6 +119,7 @@ def start_inferencia():
 
 def main():
     global window, cap, flag_inferencia
+    flag_inferencia=0
     window = Tk()
     # myframe = Frame(window)
     # myframe.pack(fill=BOTH, expand=YES)
@@ -93,16 +128,27 @@ def main():
     # mycanvas.pack(fill=BOTH, expand=YES)
 
      #activar la camara cuando tenga el dispositivo
-#     cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(0)
+    
+    global labels
+
+    #get the files, this only work with one filetype 
+    for file in os.listdir():
+        if file.endswith('tflite'):
+            model=file
+            print("model found: ",model)
+        if file.endswith('txt'):
+            labels_path=file
+            print("label found: ", labels_path)
 
    #llamada a las labels
-    global labels
-    labels=load_labels("./ImageNetLabels.txt")
+    
+    labels=load_labels(labels_path)
 
     #Inferencia
     global interpreter, input_details, output_details
-    interpreter = tflite.Interpreter("./lite-model_imagenet_mobilenet_v3_large_075_224_classification_5_default_1 (1).tflite", 
-        experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
+    interpreter = tflite.Interpreter(model)
+        #experimental_delegates=[tflite.load_delegate('libedgetpu.so.1')])
     interpreter.allocate_tensors()
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
@@ -222,17 +268,17 @@ def main():
     # bucle de lectura de la webcam
     while True:
         cv2image = cv2.cvtColor(cap.read()[1], cv2.COLOR_BGR2RGB)
-        #imagen de testeo, si no tengo webcam
-        framePIL = ImagePIL.open("./assets/índice.jpeg")
-        #framePIL = ImagePIL.fromarray(cv2image)
+        #imagen de testeo, si no tengo webcam, es lo que comentar y descomentar la siguiente
+        #framePIL = ImagePIL.open("./assets/pinki_fake.jpg")
+        framePIL = ImagePIL.fromarray(cv2image)
         #Convert image to Photoimage
         frame1 = ImageTk.PhotoImage(framePIL)
         vidLabel.configure(image=frame1)
         vidLabel.image = frame1
 
-        if flag_inferencia ==1:
+        if flag_inferencia == 1:
             #Hacer la inferencia de la imagen PIL
-            res_inferencia = inferencia(framePIL)
+            res_inferencia, res_total = inferencia(framePIL)
             x = res_inferencia.split("\n")
             #print(x[0])
             labels_array_fondos[0].configure(text=x[0])        
