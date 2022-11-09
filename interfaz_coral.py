@@ -237,7 +237,7 @@ def main():
         #When the trigger button is pressed
         if flag_inference ==1:
             #Make inference from PIL image
-            res_inferencia, res_total = inferencia(framePIL)
+            res_inferencia, res_total = inference(framePIL)
             x = res_inferencia.split("\n")
             #print(x[0])
             labels_array_fondos[0].configure(text=x[0])        
